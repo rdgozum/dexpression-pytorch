@@ -1,12 +1,17 @@
 import numpy as np
 import glob, os
-from pathlib import Path
+from matplotlib import image as im
 
 from dexpression_pytorch import settings
 
 
 def read_files(image_file, label_file):
-    return "", ""
+    image = im.imread(image_file)
+
+    with open(label_file, "r") as f:
+        label = float(f.read())
+
+    return image, label
 
 
 def get_arrays(load_from_file=False):

@@ -4,11 +4,11 @@ import sys
 
 sys.path.insert(0, os.path.abspath(".."))
 
-from dexpression_pytorch.datasets import transform_dataset
+from dexpression_pytorch.datasets import dataset
 
 
 def run():
-    x, y = transform_dataset.get_dataset()
+    x, y = dataset.get_dataset()
     print(x)
     print(y)
 

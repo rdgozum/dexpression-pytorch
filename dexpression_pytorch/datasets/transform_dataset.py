@@ -15,7 +15,7 @@ def file_reader(image_file, label_file):
 
 
 def load_from_array():
-    x = np.load(settings.data("x.npy"))
+    x = np.load(settings.data("x.npy")).reshape(-1, 224, 224, 1)
     y = np.load(settings.data("y.npy"))
 
     return x, y
@@ -49,7 +49,7 @@ def get_dataset(use_existing=True):
                     images.append(image)
                     labels.append(label)
 
-        x = np.stack(images, axis=0)
+        x = np.stack(images, axis=0).reshape(-1, 224, 224, 1)
         y = np.stack(labels, axis=0)
 
         save_to_array(x, y)

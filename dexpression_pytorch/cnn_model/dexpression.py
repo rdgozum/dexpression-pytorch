@@ -12,7 +12,7 @@ class Dexpression(Module):
 
         # First Block
         self.conv1 = Conv2d(
-            in_channels=3, out_channels=64, kernel_size=7, stride=2, padding=3
+            in_channels=1, out_channels=64, kernel_size=7, stride=2, padding=3
         )
         self.pool1 = MaxPool2d(kernel_size=3, stride=2, padding=0)
         self.lrn1 = LayerNorm(64)

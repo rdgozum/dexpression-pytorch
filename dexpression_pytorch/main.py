@@ -8,7 +8,7 @@ from dexpression_pytorch.datasets import transform_dataset
 
 
 def run():
-    x, y = transform_dataset.get_arrays()
+    x, y = transform_dataset.get_dataset()
     print(x)
     print(y)
 

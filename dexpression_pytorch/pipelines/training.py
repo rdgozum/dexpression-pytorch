@@ -89,11 +89,9 @@ def run(
             y_batch = y_train[iter : iter + batch_size]
             x_batch, y_batch = x_batch.to(device), y_batch.to(device)
 
-            train_accuracy, train_loss = train(
-                x_batch, y_batch, model, criterion, model_optimizer
-            )
-            train_accuracy += train_accuracy.item() * batch_size
-            train_loss += train_loss.item() * batch_size
+            accuracy, loss = train(x_batch, y_batch, model, criterion, model_optimizer)
+            train_accuracy += accuracy.item() * batch_size
+            train_loss += loss.item() * batch_size
 
         with torch.no_grad():
             model.eval()
@@ -103,9 +101,9 @@ def run(
                 y_batch = y_test[iter : iter + batch_size]
                 x_batch, y_batch = x_batch.to(device), y_batch.to(device)
 
-                test_accuracy, test_loss = test(x_batch, y_batch, model, criterion)
-                test_accuracy += test_accuracy.item() * batch_size
-                test_loss += test_loss.item() * batch_size
+                accuracy, loss = test(x_batch, y_batch, model, criterion)
+                test_accuracy += accuracy.item() * batch_size
+                test_loss += loss.item() * batch_size
 
             avg_train_accuracy = test_accuracy / len(x_train)
             avg_train_loss = train_loss / len(x_train)

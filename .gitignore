@@ -104,6 +104,7 @@ ENV/
 # IDE settings
 .vscode/
 
-# Project files
+# Project folders
 data/
 results/
+experiments/

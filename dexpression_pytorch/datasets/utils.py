@@ -12,6 +12,7 @@ def kfold(x, y, splits=5, shuffle=True):
 def convert_to_torch(x_train, y_train, x_test, y_test):
     # converting training images into torch format
     x_train = torch.from_numpy(x_train)
+    x_train = x_train.type(torch.FloatTensor)
 
     # converting the label into torch format
     y_train = y_train.astype(int)
@@ -19,6 +20,7 @@ def convert_to_torch(x_train, y_train, x_test, y_test):
 
     # converting test images into torch format
     x_test = torch.from_numpy(x_test)
+    x_test = x_test.type(torch.FloatTensor)
 
     # converting the label into torch format
     y_test = y_test.astype(int)

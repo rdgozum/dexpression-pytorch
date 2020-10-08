@@ -19,9 +19,9 @@ def run():
             x_train, y_train, x_test, y_test
         )
 
-        # model = network.initialize()
-        # training.run(model, x_train, y_train)
-        # testing.run(model, x_test, y_test)
+        model = network.initialize()
+        training.run(model, x_train, y_train)
+        testing.run(model, x_test, y_test)
 
 
 if __name__ == "__main__":

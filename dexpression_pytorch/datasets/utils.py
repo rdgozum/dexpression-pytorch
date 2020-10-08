@@ -1,12 +1,18 @@
 import numpy as np
+import copy
 import torch
 from sklearn.model_selection import KFold
+from sklearn.utils import shuffle as s
 
 
-def kfold(x, y, splits=5, shuffle=True):
-    kfold = KFold(n_splits=splits, shuffle=shuffle)
+def kfold(x, y, splits=10, shuffle=True):
+    x, y = s(x, y)
+    kfold = KFold(n_splits=splits, shuffle=True)
     for train, test in kfold.split(x, y):
-        yield train, test
+        x_train, y_train = x[train], y[train]
+        x_test, y_test = x[test], y[test]
+
+        yield x_train, y_train, x_test, y_test
 
 
 def convert_to_torch(x_train, y_train, x_test, y_test):

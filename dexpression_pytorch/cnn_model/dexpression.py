@@ -1,6 +1,6 @@
 import torch
 import torch.nn.functional as F
-from torch.nn import Module, Conv2d, MaxPool2d, Linear, ReLU, Softmax
+from torch.nn import Module, Conv2d, MaxPool2d, Linear, ReLU, LogSoftmax
 from torch.nn import LayerNorm, BatchNorm2d, Dropout
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
@@ -44,7 +44,7 @@ class Dexpression(Module):
         self.pool3b = MaxPool2d(kernel_size=3, stride=2, padding=0)
 
         self.fc = Linear(in_features=272 * 13 * 13, out_features=7)
-        self.softmax = Softmax(dim=1)
+        self.softmax = LogSoftmax(dim=1)
 
         self.batch_normalization = BatchNorm2d(272)
         self.dropout = Dropout(p=0.2)

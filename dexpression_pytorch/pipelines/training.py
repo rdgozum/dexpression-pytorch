@@ -3,7 +3,9 @@ import torch.nn as nn
 from torch import optim
 
 import math
-import time
+from datetime import datetime
+
+from dexpression_pytorch import settings
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -53,55 +55,20 @@ def test(x_batch, y_batch, model, criterion):
     return accuracy, loss
 
 
-def print_progress(
-    epoch,
-    iteration,
-    n_epochs,
-    n_iters_train,
-    avg_train_accuracy,
-    avg_train_loss,
-    avg_test_accuracy,
-    avg_test_loss,
-    start,
-):
-    training_time = timeSince(start, iteration / n_iters_train)
-
-    print(f"Epoch {epoch+1}/{n_epochs} | Iteration {iteration}")
-    print(f"Train Accuracy: {avg_train_accuracy*100:.2f}%")
-    print(f"Train Loss: {avg_train_loss:.3f}")
-    print(f"Test Accuracy: {avg_test_accuracy*100:.2f}%")
-    print(f"Test Loss: {avg_test_loss:.3f}")
-    print(f"Training Time: {training_time} seconds")
-    print("")
-
-
-def asMinutes(s):
-    m = math.floor(s / 60)
-    s -= m * 60
-    return "%dm %ds" % (m, s)
-
-
-def timeSince(since, percent):
-    now = time.time()
-    s = now - since
-    return "%s" % asMinutes(s)
-
-
 def run(
+    fold,
     model,
     x_train,
     y_train,
     x_test,
     y_test,
     batch_size=32,
-    n_epochs=5,
+    n_epochs=15,
     print_every=20,
-    plot_every=100,
-    save_every=3000,
+    save_every=70,
     learning_rate=0.001,
 ):
     # Initialize variables
-    start = time.time()
     history = []
 
     # Initialize criterion and optimizers
@@ -111,12 +78,13 @@ def run(
     # Ensure dropout layers are in train mode
     model.train()
 
+    # Perform training
     for epoch in range(n_epochs):
-        train_accuracy = 0.0
-        train_loss = 0.0
+        running_train_accuracy = 0.0
+        running_train_loss = 0.0
 
-        test_accuracy = 0.0
-        test_loss = 0.0
+        running_test_accuracy = 0.0
+        running_test_loss = 0.0
 
         iteration = 0
         n_iters_train = len(x_train) / batch_size
@@ -126,11 +94,13 @@ def run(
             y_batch = y_train[index : index + batch_size]
             x_batch, y_batch = x_batch.to(device), y_batch.to(device)
 
-            accuracy, loss = train(x_batch, y_batch, model, criterion, model_optimizer)
-            train_accuracy += accuracy.item()
-            train_loss += loss.item()
+            train_accuracy, train_loss = train(
+                x_batch, y_batch, model, criterion, model_optimizer
+            )
+            running_train_accuracy += train_accuracy.item()
+            running_train_loss += train_loss.item()
 
-            # Validation
+            # Perform testing
             iteration += 1
             if iteration % print_every == 0:
                 with torch.no_grad():
@@ -140,16 +110,18 @@ def run(
                         y_batch = y_test[index : index + batch_size]
                         x_batch, y_batch = x_batch.to(device), y_batch.to(device)
 
-                        accuracy, loss = test(x_batch, y_batch, model, criterion)
-                        test_accuracy += accuracy.item()
-                        test_loss += loss.item()
+                        test_accuracy, test_loss = test(
+                            x_batch, y_batch, model, criterion
+                        )
+                        running_test_accuracy += test_accuracy.item()
+                        running_test_loss += test_loss.item()
 
                 # Track metrics
-                avg_train_accuracy = train_accuracy / print_every
-                avg_train_loss = train_loss / print_every
+                avg_train_accuracy = running_train_accuracy / print_every
+                avg_train_loss = running_train_loss / print_every
 
-                avg_test_accuracy = test_accuracy / n_iters_test
-                avg_test_loss = test_loss / n_iters_test
+                avg_test_accuracy = running_test_accuracy / n_iters_test
+                avg_test_loss = running_test_loss / n_iters_test
 
                 history.append(
                     [
@@ -160,8 +132,18 @@ def run(
                     ]
                 )
 
-                # Print results
+                # Reset metrics
+                running_train_accuracy = 0.0
+                running_train_loss = 0.0
+
+                running_test_accuracy = 0.0
+                running_test_loss = 0.0
+
+                model.train()
+
+                # Print progress
                 print_progress(
+                    fold,
                     epoch,
                     iteration,
                     n_epochs,
@@ -170,14 +152,49 @@ def run(
                     avg_train_loss,
                     avg_test_accuracy,
                     avg_test_loss,
-                    start,
                 )
 
-                train_accuracy = 0.0
-                train_loss = 0.0
+            if iteration % save_every == 0 and fold == 0:  # remove fold == 0
+                model_name = "cnn-fold{:d}-{:d}".format(
+                    fold + 1, int(datetime.now().timestamp()),
+                )
+                checkpoint = "{:s}_{:d}_{:d}-{:.2f}.tar".format(
+                    model_name, epoch + 1, iteration, train_accuracy,
+                )
 
-                test_accuracy = 0.0
-                test_loss = 0.0
+                print("Saving checkpoint {}...".format(settings.results(checkpoint)))
+                print("")
 
-                start = time.time()
-                model.train()
+                torch.save(
+                    {
+                        "fold": fold + 1,
+                        "epoch": epoch + 1,
+                        "iteration": iteration,
+                        "model": model.state_dict(),
+                        "model_opt": model_optimizer.state_dict(),
+                        "loss": train_loss,
+                    },
+                    settings.results(checkpoint),
+                )
+
+
+def print_progress(
+    fold,
+    epoch,
+    iteration,
+    n_epochs,
+    n_iters,
+    avg_train_accuracy,
+    avg_train_loss,
+    avg_test_accuracy,
+    avg_test_loss,
+):
+    print(
+        "Fold: %d | Epoch: %d/%d | Iteration: %d/%d"
+        % (fold + 1, epoch + 1, n_epochs, iteration, n_iters)
+    )
+    print("Train Accuracy: %.2f%%" % (avg_train_accuracy * 100))
+    print("Train Loss: %.3f%%" % (avg_train_loss * 100))
+    print("Test Accuracy: %.2f%%" % (avg_test_accuracy * 100))
+    print("Test Loss: %.3f%%" % (avg_test_loss * 100))
+    print("")

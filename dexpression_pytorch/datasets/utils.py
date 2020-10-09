@@ -3,7 +3,7 @@ from sklearn.model_selection import KFold
 from sklearn.utils import shuffle as s
 
 
-def kfold(x, y, splits=10, shuffle=True):
+def kfold(x, y, splits=5, shuffle=True):
     x, y = s(x, y)
     kfold = KFold(n_splits=splits, shuffle=shuffle)
 

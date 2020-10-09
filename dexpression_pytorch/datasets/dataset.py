@@ -54,4 +54,6 @@ def get_dataset(use_existing=True):
 
         save_to_array(x, y)
 
+    print("Loaded datasets {} and {}...".format(x.shape, y.shape))
+
     return x, y

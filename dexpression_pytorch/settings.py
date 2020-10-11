@@ -6,14 +6,10 @@ RESULTS_FOLDER = ROOT / "results"
 
 
 def data(*paths):
-    data_path = DATA_FOLDER.joinpath(*paths)
-    Path(data_path).mkdir(parents=True, exist_ok=True)
-
-    return data_path
+    """Return path in the 'data' folder."""
+    return DATA_FOLDER.joinpath(*paths)
 
 
 def results(*paths):
-    results_path = RESULTS_FOLDER.joinpath(*paths)
-    Path(results_path).mkdir(parents=True, exist_ok=True)
-
-    return results_path
+    """Return path in the 'results' folder."""
+    return RESULTS_FOLDER.joinpath(*paths)

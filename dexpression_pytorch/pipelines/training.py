@@ -9,6 +9,8 @@ from dexpression_pytorch import settings
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
+history = []
+
 
 def train(x_batch, y_batch, model, criterion, model_optimizer):
     # Clean existing gradients
@@ -63,11 +65,11 @@ def run(
     x_test,
     y_test,
     batch_size=32,
-    n_epochs=15,
+    n_epochs=25,
     learning_rate=0.001,
 ):
     # Initialize variables
-    history = []
+    global history
 
     # Initialize criterion and optimizers
     criterion = nn.NLLLoss()
@@ -140,6 +142,9 @@ def run(
         # Save progress
         save_progress(fold, epoch, avg_test_accuracy, model, model_optimizer)
 
+        print("Fold history: ", history)
+        print("")
+
 
 def print_progress(
     fold,
@@ -150,7 +155,7 @@ def print_progress(
     avg_test_accuracy,
     avg_test_loss,
 ):
-    print("FOLD: %d, EPOCH: %d/%d" % (fold + 1, epoch + 1, n_epochs))
+    print("Fold: %d, Epoch: %d/%d" % (fold + 1, epoch + 1, n_epochs))
     print("Train Accuracy: %.2f%%" % (avg_train_accuracy * 100))
     print("Train Loss: %.3f" % (avg_train_loss))
     print("Test Accuracy: %.2f%%" % (avg_test_accuracy * 100))
@@ -159,7 +164,7 @@ def print_progress(
 
 
 def save_progress(fold, epoch, avg_test_accuracy, model, model_optimizer):
-    model_name = "cnn-fold{:d}-{:d}".format(fold + 1, int(datetime.now().timestamp()),)
+    model_name = "cnn-fold{:d}-{:d}".format(fold + 1, int(datetime.now().timestamp()))
     checkpoint = "{:s}_{:d}-{:.2f}.tar".format(
         model_name, epoch + 1, avg_test_accuracy,
     )

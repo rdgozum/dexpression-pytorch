@@ -1,13 +1,11 @@
-import numpy as np
-import copy
 import torch
 from sklearn.model_selection import KFold
 from sklearn.utils import shuffle as s
 
 
-def kfold(x, y, splits=10, shuffle=True):
+def kfold(x, y, splits=5, shuffle=True):
     x, y = s(x, y)
-    kfold = KFold(n_splits=splits, shuffle=True)
+    kfold = KFold(n_splits=splits, shuffle=shuffle)
 
     for train, test in kfold.split(x, y):
         x_train, y_train = x[train], y[train]

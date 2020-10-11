@@ -2,7 +2,10 @@ import torch
 import torch.nn as nn
 from torch import optim
 
-import time
+import math
+from datetime import datetime
+
+from dexpression_pytorch import settings
 
 device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
@@ -53,75 +56,145 @@ def test(x_batch, y_batch, model, criterion):
 
 
 def run(
+    fold,
     model,
     x_train,
     y_train,
     x_test,
     y_test,
-    batch_size=64,
-    n_epochs=10,
-    print_every=100,
-    plot_every=100,
-    save_every=3000,
+    batch_size=32,
+    n_epochs=15,
+    print_every=20,
+    save_every=70,
     learning_rate=0.001,
 ):
     # Initialize variables
     history = []
-    # best_accuracy = 0.0
 
     # Initialize criterion and optimizers
-    criterion = nn.CrossEntropyLoss()
+    criterion = nn.NLLLoss()
     model_optimizer = optim.Adam(model.parameters(), lr=learning_rate)
 
     # Ensure dropout layers are in train mode
     model.train()
 
+    # Perform training
     for epoch in range(n_epochs):
-        epoch_start = time.time()
-        train_accuracy = 0.0
-        train_loss = 0.0
+        running_train_accuracy = 0.0
+        running_train_loss = 0.0
 
-        test_accuracy = 0.0
-        test_loss = 0.0
+        running_test_accuracy = 0.0
+        running_test_loss = 0.0
 
-        for iter in range(0, len(x_train), batch_size):
-            x_batch = x_train[iter : iter + batch_size]
-            y_batch = y_train[iter : iter + batch_size]
+        iteration = 0
+        n_iters_train = len(x_train) / batch_size
+        n_iters_test = len(x_test) / batch_size
+        for index in range(0, len(x_train), batch_size):
+            x_batch = x_train[index : index + batch_size]
+            y_batch = y_train[index : index + batch_size]
             x_batch, y_batch = x_batch.to(device), y_batch.to(device)
 
             train_accuracy, train_loss = train(
                 x_batch, y_batch, model, criterion, model_optimizer
             )
-            train_accuracy += train_accuracy.item() * batch_size
-            train_loss += train_loss.item() * batch_size
+            running_train_accuracy += train_accuracy.item()
+            running_train_loss += train_loss.item()
 
-        with torch.no_grad():
-            model.eval()
+            # Perform testing
+            iteration += 1
+            if iteration % print_every == 0:
+                with torch.no_grad():
+                    model.eval()
+                    for index in range(0, len(x_test), batch_size):
+                        x_batch = x_test[index : index + batch_size]
+                        y_batch = y_test[index : index + batch_size]
+                        x_batch, y_batch = x_batch.to(device), y_batch.to(device)
 
-            for iter in range(0, len(x_test), batch_size):
-                x_batch = x_test[iter : iter + batch_size]
-                y_batch = y_test[iter : iter + batch_size]
-                x_batch, y_batch = x_batch.to(device), y_batch.to(device)
+                        test_accuracy, test_loss = test(
+                            x_batch, y_batch, model, criterion
+                        )
+                        running_test_accuracy += test_accuracy.item()
+                        running_test_loss += test_loss.item()
 
-                test_accuracy, test_loss = test(x_batch, y_batch, model, criterion)
-                test_accuracy += test_accuracy.item() * batch_size
-                test_loss += test_loss.item() * batch_size
+                # Track metrics
+                avg_train_accuracy = running_train_accuracy / print_every
+                avg_train_loss = running_train_loss / print_every
 
-            avg_train_accuracy = test_accuracy / len(x_train)
-            avg_train_loss = train_loss / len(x_train)
+                avg_test_accuracy = running_test_accuracy / n_iters_test
+                avg_test_loss = running_test_loss / n_iters_test
 
-            avg_test_accuracy = test_accuracy / len(x_test)
-            avg_test_loss = test_loss / len(x_test)
+                history.append(
+                    [
+                        avg_train_accuracy,
+                        avg_test_accuracy,
+                        avg_train_loss,
+                        avg_test_loss,
+                    ]
+                )
 
-            history.append(
-                [avg_train_accuracy, avg_test_accuracy, avg_train_loss, avg_test_loss]
-            )
+                # Reset metrics
+                running_train_accuracy = 0.0
+                running_train_loss = 0.0
 
-            epoch_end = time.time()
+                running_test_accuracy = 0.0
+                running_test_loss = 0.0
 
-            print(
-                f"Epoch : {epoch}, Training: Accuracy: {avg_train_accuracy*100}%, Loss: f{avg_train_loss}, \n\t\tValidation : Accuracy: {avg_test_accuracy*100}%, Loss : {avg_test_loss}, Time: {epoch_end-epoch_start}s"
-            )
+                model.train()
 
-            # Save if the model has best accuracy till now
-            torch.save(model.state_dict(), f"model_{epoch}.pth")
+                # Print progress
+                print_progress(
+                    fold,
+                    epoch,
+                    iteration,
+                    n_epochs,
+                    n_iters_train,
+                    avg_train_accuracy,
+                    avg_train_loss,
+                    avg_test_accuracy,
+                    avg_test_loss,
+                )
+
+            if iteration % save_every == 0 and fold == 0:  # remove fold == 0
+                model_name = "cnn-fold{:d}-{:d}".format(
+                    fold + 1, int(datetime.now().timestamp()),
+                )
+                checkpoint = "{:s}_{:d}_{:d}-{:.2f}.tar".format(
+                    model_name, epoch + 1, iteration, train_accuracy,
+                )
+
+                print("Saving checkpoint {}...".format(settings.results(checkpoint)))
+                print("")
+
+                torch.save(
+                    {
+                        "fold": fold + 1,
+                        "epoch": epoch + 1,
+                        "iteration": iteration,
+                        "model": model.state_dict(),
+                        "model_opt": model_optimizer.state_dict(),
+                        "loss": train_loss,
+                    },
+                    settings.results(checkpoint),
+                )
+
+
+def print_progress(
+    fold,
+    epoch,
+    iteration,
+    n_epochs,
+    n_iters,
+    avg_train_accuracy,
+    avg_train_loss,
+    avg_test_accuracy,
+    avg_test_loss,
+):
+    print(
+        "Fold: %d | Epoch: %d/%d | Iteration: %d/%d"
+        % (fold + 1, epoch + 1, n_epochs, iteration, n_iters)
+    )
+    print("Train Accuracy: %.2f%%" % (avg_train_accuracy * 100))
+    print("Train Loss: %.3f%%" % (avg_train_loss * 100))
+    print("Test Accuracy: %.2f%%" % (avg_test_accuracy * 100))
+    print("Test Loss: %.3f%%" % (avg_test_loss * 100))
+    print("")

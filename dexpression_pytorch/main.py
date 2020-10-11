@@ -1,5 +1,4 @@
 """Main module."""
-import copy
 import os
 import sys
 
@@ -11,17 +10,17 @@ from dexpression_pytorch.pipelines import network, training, testing
 
 def run():
     x, y = dataset.get_dataset()
-    print("Loading datasets {} and {}".format(x.shape, y.shape))
     folds = utils.kfold(x, y)
 
-    for x_train, y_train, x_test, y_test in folds:
+    for fold, (x_train, y_train, x_test, y_test) in enumerate(folds):
         x_train, y_train, x_test, y_test = utils.convert_to_torch(
             x_train, y_train, x_test, y_test
         )
 
         model = network.initialize()
-        training.run(model, x_train, y_train, x_test, y_test)
+        training.run(fold, model, x_train, y_train, x_test, y_test)
         # testing.run(model, x_test, y_test)
+        exit()
 
 
 if __name__ == "__main__":

@@ -116,7 +116,14 @@ def run(
         avg_test_loss = running_test_loss / n_iters_test
 
         history.append(
-            [avg_train_accuracy, avg_test_accuracy, avg_train_loss, avg_test_loss]
+            {
+                "fold": fold + 1,
+                "epoch": epoch + 1,
+                "avg_train_accuracy": avg_train_accuracy * 100,
+                "avg_test_accuracy": avg_test_accuracy * 100,
+                "avg_train_loss": avg_train_loss,
+                "avg_test_loss": avg_test_loss,
+            }
         )
 
         # Print progress
@@ -143,12 +150,11 @@ def print_progress(
     avg_test_accuracy,
     avg_test_loss,
 ):
-    print()
-    print("FOLD: %d | EPOCH: %d/%d" % (fold + 1, epoch + 1, n_epochs))
+    print("FOLD: %d, EPOCH: %d/%d" % (fold + 1, epoch + 1, n_epochs))
     print("Train Accuracy: %.2f%%" % (avg_train_accuracy * 100))
-    print("Train Loss: %.3f%%" % (avg_train_loss * 100))
+    print("Train Loss: %.3f" % (avg_train_loss))
     print("Test Accuracy: %.2f%%" % (avg_test_accuracy * 100))
-    print("Test Loss: %.3f%%" % (avg_test_loss * 100))
+    print("Test Loss: %.3f" % (avg_test_loss))
     print("")
 
 

@@ -107,4 +107,5 @@ ENV/
 # Project folders
 data/
 results/
+results-freeze/
 experiments/

@@ -39,6 +39,15 @@ def get_accuracy():
     return train_accuracy, test_accuracy, filename
 
 
+def get_loss():
+    train_loss = get_train_loss()
+    test_loss = get_test_loss()
+
+    filename = settings.results("train_test_loss")
+
+    return train_loss, test_loss, filename
+
+
 def get_test_pred(fold, epoch):
     df = pd.read_csv(history)
     filter = (df["fold"] == fold) & (df["epoch"] == epoch)
@@ -79,5 +88,31 @@ def get_test_accuracy():
         test_accuracy = df.loc[filter, "avg_test_accuracy"].tolist()
 
         list.append(test_accuracy)
+
+    return list
+
+
+def get_train_loss():
+    list = []
+
+    df = pd.read_csv(history)
+    for fold in range(5):
+        filter = df["fold"] == fold + 1
+        train_loss = df.loc[filter, "avg_train_loss"].tolist()
+
+        list.append(train_loss)
+
+    return list
+
+
+def get_test_loss():
+    list = []
+
+    df = pd.read_csv(history)
+    for fold in range(5):
+        filter = df["fold"] == fold + 1
+        test_loss = df.loc[filter, "avg_test_loss"].tolist()
+
+        list.append(test_loss)
 
     return list

@@ -18,7 +18,7 @@ labels = [
 ]
 
 
-def confusion_matrix(fold=1, epoch=25):
+def confusion_matrix(fold, epoch=25):
     test_pred = get_test_pred(fold=fold, epoch=epoch)
     test_truth = get_test_truth(fold=fold, epoch=epoch)
     matrix = cm(test_truth, test_pred)

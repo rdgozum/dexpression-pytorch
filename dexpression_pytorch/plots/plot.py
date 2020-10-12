@@ -4,8 +4,8 @@ import matplotlib.pyplot as plt
 from dexpression_pytorch.plots import plot_utils
 
 
-def plot_confusion_matrix():
-    matrix_df, filename = plot_utils.confusion_matrix()
+def plot_confusion_matrix(fold):
+    matrix_df, filename = plot_utils.confusion_matrix(fold)
 
     ax = sb.heatmap(matrix_df, annot=True, cmap="YlGnBu")
     ax.set(ylabel="True", xlabel="Predicted")

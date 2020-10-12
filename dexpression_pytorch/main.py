@@ -27,7 +27,8 @@ def run():
     output_writer.dump_dict_list(training.history)
 
     # Plot history
-    plot.plot_confusion_matrix()
+    for fold in range(5):
+        plot.plot_confusion_matrix(fold + 1)
     plot.plot_accuracy()
     plot.plot_loss()
 

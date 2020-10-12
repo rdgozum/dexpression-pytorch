@@ -28,6 +28,7 @@ def run():
 
     # Plot history
     plot.plot_confusion_matrix()
+    plot.plot_accuracy()
 
 
 if __name__ == "__main__":

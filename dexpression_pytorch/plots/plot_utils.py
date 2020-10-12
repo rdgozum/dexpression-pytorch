@@ -25,10 +25,18 @@ def confusion_matrix(fold=1, epoch=25):
     matrix = (matrix.T / matrix.astype(np.float).sum(axis=1)).T
     matrix_df = pd.DataFrame(matrix, labels, labels)
 
-    filename = "confusion_matrix-fold{:d}".format(fold)
-    output_filename = settings.results(filename)
+    filename = settings.results("confusion_matrix-fold{:d}".format(fold))
 
-    return matrix_df, output_filename
+    return matrix_df, filename
+
+
+def get_accuracy():
+    train_accuracy = get_train_accuracy()
+    test_accuracy = get_test_accuracy()
+
+    filename = settings.results("train_test_accuracy")
+
+    return train_accuracy, test_accuracy, filename
 
 
 def get_test_pred(fold, epoch):
@@ -47,3 +55,29 @@ def get_test_truth(fold, epoch):
     test_truth = ast.literal_eval(test_truth)
 
     return test_truth
+
+
+def get_train_accuracy():
+    list = []
+
+    df = pd.read_csv(history)
+    for fold in range(5):
+        filter = df["fold"] == fold + 1
+        train_accuracy = df.loc[filter, "avg_train_accuracy"].tolist()
+
+        list.append(train_accuracy)
+
+    return list
+
+
+def get_test_accuracy():
+    list = []
+
+    df = pd.read_csv(history)
+    for fold in range(5):
+        filter = df["fold"] == fold + 1
+        test_accuracy = df.loc[filter, "avg_test_accuracy"].tolist()
+
+        list.append(test_accuracy)
+
+    return list

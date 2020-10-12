@@ -9,68 +9,40 @@ def plot_confusion_matrix(fold):
 
     ax = sb.heatmap(matrix_df, annot=True, cmap="YlGnBu")
     ax.set(ylabel="True", xlabel="Predicted")
-    plt.title("Confusion Matrix")
+    plt.title("Confusion Matrix (Fold={})".format(fold))
     plt.savefig(filename, bbox_inches="tight", dpi=200)
     plt.close()
 
 
-def plot_accuracy():
-    x_axis = [epoch for epoch in range(25)]
-    train_accuracy, test_accuracy, filename = plot_utils.get_accuracy()
+def plot_metrics():
+    metrics = ["accuracy", "loss"]
 
-    fig = plt.figure()
-    ax1 = fig.add_subplot(1, 2, 1)
-    ax2 = fig.add_subplot(1, 2, 2)
+    for metric in metrics:
+        x_axis = [epoch for epoch in range(25)]
+        train_output, test_output, filename = plot_utils.get_metric(metric)
 
-    for fold in range(5):
-        ax1.plot(x_axis, train_accuracy[fold], label="fold {:d}".format(fold + 1))
-        ax2.plot(x_axis, test_accuracy[fold], label="fold {:d}".format(fold + 1))
+        fig = plt.figure()
+        ax1 = fig.add_subplot(1, 2, 1)
+        ax2 = fig.add_subplot(1, 2, 2)
 
-    ax1.set_xlabel("Epochs")
-    ax1.set_ylabel("Accuracy")
-    ax1.set_title("Train Accuracy")
-    ax1.legend()
+        for fold in range(5):
+            ax1.plot(x_axis, train_output[fold], label="fold {:d}".format(fold + 1))
+            ax2.plot(x_axis, test_output[fold], label="fold {:d}".format(fold + 1))
 
-    ax2.set_xlabel("Epochs")
-    ax2.set_title("Test Accuracy")
-    ax2.legend()
+        ax1.set_xlabel("epochs")
+        ax1.set_ylabel(metric)
+        ax1.set_title("train {}".format(metric))
+        ax1.legend()
 
-    ratio = 0.8
-    for ax in [ax1, ax2]:
-        xmin, xmax = ax.get_xlim()
-        ymin, ymax = ax.get_ylim()
-        ax.set_aspect(abs((xmax - xmin) / (ymax - ymin)) * ratio, adjustable="box")
+        ax2.set_xlabel("epochs")
+        ax2.set_title("test {}".format(metric))
+        ax2.legend()
 
-    plt.savefig(filename, bbox_inches="tight", dpi=200)
-    plt.close()
+        ratio = 0.8
+        for ax in [ax1, ax2]:
+            xmin, xmax = ax.get_xlim()
+            ymin, ymax = ax.get_ylim()
+            ax.set_aspect(abs((xmax - xmin) / (ymax - ymin)) * ratio, adjustable="box")
 
-
-def plot_loss():
-    x_axis = [epoch for epoch in range(25)]
-    train_loss, test_loss, filename = plot_utils.get_loss()
-
-    fig = plt.figure()
-    ax1 = fig.add_subplot(1, 2, 1)
-    ax2 = fig.add_subplot(1, 2, 2)
-
-    for fold in range(5):
-        ax1.plot(x_axis, train_loss[fold], label="fold {:d}".format(fold + 1))
-        ax2.plot(x_axis, test_loss[fold], label="fold {:d}".format(fold + 1))
-
-    ax1.set_xlabel("Epochs")
-    ax1.set_ylabel("Loss")
-    ax1.set_title("Train Loss")
-    ax1.legend()
-
-    ax2.set_xlabel("Epochs")
-    ax2.set_title("Test Loss")
-    ax2.legend()
-
-    ratio = 0.8
-    for ax in [ax1, ax2]:
-        xmin, xmax = ax.get_xlim()
-        ymin, ymax = ax.get_ylim()
-        ax.set_aspect(abs((xmax - xmin) / (ymax - ymin)) * ratio, adjustable="box")
-
-    plt.savefig(filename, bbox_inches="tight", dpi=200)
-    plt.close()
+        plt.savefig(filename, bbox_inches="tight", dpi=200)
+        plt.close()

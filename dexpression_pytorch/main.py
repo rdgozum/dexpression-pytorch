@@ -29,8 +29,7 @@ def run():
     # Plot history
     for fold in range(5):
         plot.plot_confusion_matrix(fold + 1)
-    plot.plot_accuracy()
-    plot.plot_loss()
+    plot.plot_metrics()
 
 
 if __name__ == "__main__":

@@ -30,22 +30,17 @@ def confusion_matrix(fold, epoch=25):
     return matrix_df, filename
 
 
-def get_accuracy():
-    train_accuracy = get_train_accuracy()
-    test_accuracy = get_test_accuracy()
+def get_metric(metric):
+    if metric == "accuracy":
+        train_output = get_data("avg_train_accuracy")
+        test_output = get_data("avg_test_accuracy")
+    else:
+        train_output = get_data("avg_train_loss")
+        test_output = get_data("avg_test_loss")
 
-    filename = settings.results("train_test_accuracy")
+    filename = settings.results("train_test_{}".format(metric))
 
-    return train_accuracy, test_accuracy, filename
-
-
-def get_loss():
-    train_loss = get_train_loss()
-    test_loss = get_test_loss()
-
-    filename = settings.results("train_test_loss")
-
-    return train_loss, test_loss, filename
+    return train_output, test_output, filename
 
 
 def get_test_pred(fold, epoch):
@@ -66,53 +61,14 @@ def get_test_truth(fold, epoch):
     return test_truth
 
 
-def get_train_accuracy():
+def get_data(metric):
     list = []
 
     df = pd.read_csv(history)
     for fold in range(5):
         filter = df["fold"] == fold + 1
-        train_accuracy = df.loc[filter, "avg_train_accuracy"].tolist()
+        train_accuracy = df.loc[filter, metric].tolist()
 
         list.append(train_accuracy)
-
-    return list
-
-
-def get_test_accuracy():
-    list = []
-
-    df = pd.read_csv(history)
-    for fold in range(5):
-        filter = df["fold"] == fold + 1
-        test_accuracy = df.loc[filter, "avg_test_accuracy"].tolist()
-
-        list.append(test_accuracy)
-
-    return list
-
-
-def get_train_loss():
-    list = []
-
-    df = pd.read_csv(history)
-    for fold in range(5):
-        filter = df["fold"] == fold + 1
-        train_loss = df.loc[filter, "avg_train_loss"].tolist()
-
-        list.append(train_loss)
-
-    return list
-
-
-def get_test_loss():
-    list = []
-
-    df = pd.read_csv(history)
-    for fold in range(5):
-        filter = df["fold"] == fold + 1
-        test_loss = df.loc[filter, "avg_test_loss"].tolist()
-
-        list.append(test_loss)
 
     return list

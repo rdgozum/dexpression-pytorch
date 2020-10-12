@@ -6,5 +6,6 @@ from dexpression_pytorch import settings
 
 
 def dump_dict_list(history):
+    print("Saving history: ", history)
     df = pd.DataFrame(history)
     df.to_csv(settings.results("history.csv"))

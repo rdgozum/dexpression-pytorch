@@ -7,7 +7,7 @@ sys.path.insert(0, os.path.abspath(".."))
 from dexpression_pytorch.datasets import dataset, utils
 from dexpression_pytorch.pipelines import network, training, testing
 from dexpression_pytorch.utilities import output_writer
-from dexpression_pytorch.plots import confusion_matrix
+from dexpression_pytorch.plots import plot
 
 
 def run():
@@ -25,6 +25,9 @@ def run():
 
     # Save history
     output_writer.dump_dict_list(training.history)
+
+    # Plot history
+    plot.plot_confusion_matrix()
 
 
 if __name__ == "__main__":

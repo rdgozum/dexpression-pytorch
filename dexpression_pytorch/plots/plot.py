@@ -9,7 +9,7 @@ def plot_confusion_matrix(fold):
 
     ax = sb.heatmap(matrix_df, annot=True, cmap="YlGnBu")
     ax.set(ylabel="True", xlabel="Predicted")
-    plt.title("Confusion Matrix (Fold={})".format(fold))
+    plt.title("Confusion Matrix (Fold={:d})".format(fold))
     plt.savefig(filename, bbox_inches="tight", dpi=200)
     plt.close()
 
@@ -31,11 +31,11 @@ def plot_metrics():
 
         ax1.set_xlabel("epochs")
         ax1.set_ylabel(metric)
-        ax1.set_title("train {}".format(metric))
+        ax1.set_title("train {:s}".format(metric))
         ax1.legend()
 
         ax2.set_xlabel("epochs")
-        ax2.set_title("test {}".format(metric))
+        ax2.set_title("test {:s}".format(metric))
         ax2.legend()
 
         ratio = 0.8

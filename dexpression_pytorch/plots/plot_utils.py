@@ -38,7 +38,7 @@ def get_metric(metric):
         train_output = get_data("avg_train_loss")
         test_output = get_data("avg_test_loss")
 
-    filename = settings.results("train_test_{}".format(metric))
+    filename = settings.results("train_test_{:s}".format(metric))
 
     return train_output, test_output, filename
 

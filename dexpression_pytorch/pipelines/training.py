@@ -54,7 +54,11 @@ def test(x_batch, y_batch, model, criterion):
     # Convert correct_counts to float and then compute the mean
     accuracy = torch.mean(correct_counts.type(torch.FloatTensor))
 
-    return accuracy, loss
+    # Get predicted and ground truth values
+    y_pred = y_pred.to("cpu").tolist()
+    y_truth = y_truth.to("cpu").tolist()
+
+    return accuracy, loss, y_pred, y_truth
 
 
 def run(
@@ -101,14 +105,20 @@ def run(
         # Perform testing
         with torch.no_grad():
             model.eval()
+
+            test_pred, test_truth = [], []
             for index in range(0, len(x_test), batch_size):
                 x_batch = x_test[index : index + batch_size]
                 y_batch = y_test[index : index + batch_size]
                 x_batch, y_batch = x_batch.to(device), y_batch.to(device)
 
-                test_accuracy, test_loss = test(x_batch, y_batch, model, criterion)
+                test_accuracy, test_loss, pred, truth = test(
+                    x_batch, y_batch, model, criterion
+                )
                 running_test_accuracy += test_accuracy.item()
                 running_test_loss += test_loss.item()
+                test_pred.extend(pred)
+                test_truth.extend(truth)
 
         # Track metrics
         avg_train_accuracy = running_train_accuracy / n_iters_train
@@ -125,6 +135,8 @@ def run(
                 "avg_test_accuracy": avg_test_accuracy * 100,
                 "avg_train_loss": avg_train_loss,
                 "avg_test_loss": avg_test_loss,
+                "test_pred": test_pred,
+                "test_truth": test_truth,
             }
         )
 

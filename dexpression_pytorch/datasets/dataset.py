@@ -29,7 +29,7 @@ def save_to_array(x, y):
         np.save(file, y)
 
 
-def get_dataset(use_existing=True):
+def load_dataset(use_existing=True):
     if use_existing:
         x, y = load_from_array()
     else:
@@ -55,5 +55,6 @@ def get_dataset(use_existing=True):
         save_to_array(x, y)
 
     print("Loaded datasets {} and {}...".format(x.shape, y.shape))
+    print("")
 
     return x, y

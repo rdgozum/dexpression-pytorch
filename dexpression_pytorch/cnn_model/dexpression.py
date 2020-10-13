@@ -7,7 +7,11 @@ device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
 
 class Dexpression(Module):
+    """Convolutional Neural Network for facial expression recognition."""
+
     def __init__(self):
+        """The constructor for Dexpression class."""
+
         super(Dexpression, self).__init__()
 
         # First Block
@@ -50,6 +54,24 @@ class Dexpression(Module):
         self.dropout = Dropout(p=0.2)
 
     def forward(self, x, dropout=True, batch_normalization=True):
+        """
+        Performs a single forward pass through the network.
+
+        Parameters
+        ----------
+        x : object
+            The training batch containing input and output variables.
+        dropout : bool, optional
+            Enables dropout regularization method (default is True).
+        LRN : bool, optional
+            Enables Local Response Normalization (default is True).
+
+        Returns
+        -------
+        logits : object
+            The probability distribution over classes.
+        """
+
         # First Block
         conv1_out = F.relu(self.conv1(x))
         pool1_out = self.pool1(conv1_out)

@@ -10,6 +10,8 @@ history = []
 
 
 def train(x_batch, y_batch, model, criterion, model_optimizer):
+    """Performs a single forward and backward pass through the network on the training batch."""
+
     # Clean existing gradients
     model_optimizer.zero_grad()
 
@@ -37,6 +39,8 @@ def train(x_batch, y_batch, model, criterion, model_optimizer):
 
 
 def test(x_batch, y_batch, model, criterion):
+    """Performs a single forward and backward pass through the network on the testing batch."""
+
     # Forward pass
     output = model(x_batch)
     _, y_pred = torch.max(output.data, 1)
@@ -69,6 +73,8 @@ def run(
     n_epochs=25,
     learning_rate=0.001,
 ):
+    """Main function for network training and testing."""
+
     # Initialize variables
     global history
 

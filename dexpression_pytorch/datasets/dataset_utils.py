@@ -4,6 +4,32 @@ from sklearn.utils import shuffle as s
 
 
 def kfold(x, y, splits=5, shuffle=True):
+    """
+    Performs kfold split on the dataset.
+
+    Parameters
+    ----------
+    x : object
+        The input variables from the dataset.
+    y : object
+        The output variables from the dataset.
+    splits : int, optional
+        Number of folds (default is 5).
+    shuffle : bool, optional
+        Whether to shuffle the data before splitting into batches (default is True).
+
+    Returns
+    -------
+    x_train : object
+        The input variables to be used during training.
+    y_train : object
+        The output variables to be used during training.
+    x_test : object
+        The input variables to be used during testing.
+    y_test : object
+        The output variables to be used during testing.
+    """
+
     x, y = s(x, y)
     kfold = KFold(n_splits=splits, shuffle=shuffle)
 
@@ -15,6 +41,8 @@ def kfold(x, y, splits=5, shuffle=True):
 
 
 def convert_to_torch(x_train, y_train, x_test, y_test):
+    """Converts train and test data into torch tensors."""
+
     # converting training images into torch tensor
     x_train = torch.from_numpy(x_train)
     x_train = x_train.type(torch.FloatTensor)

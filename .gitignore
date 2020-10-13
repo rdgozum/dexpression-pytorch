@@ -105,7 +105,8 @@ ENV/
 .vscode/
 
 # Project folders
+*.tar
+*.csv*
 data/
-results/
 results-freeze/
 experiments/

@@ -8,6 +8,15 @@ from dexpression_pytorch import settings
 
 
 def dump_dict_list(history):
+    """
+    Converts history to Pandas DataFrame then save to a local folder.
+
+    Parameters
+    ----------
+    history : list
+        The record of training and testing performance per epoch.
+    """
+
     filename = settings.results("history.csv")
 
     print("Saving history {}...".format(filename))
@@ -26,6 +35,8 @@ def print_progress(
     avg_test_accuracy,
     avg_test_loss,
 ):
+    """Prints training and testing performance per epoch."""
+
     print("Fold: %d, Epoch: %d/%d" % (fold + 1, epoch + 1, n_epochs))
     print("Train Accuracy: %.2f%%" % (avg_train_accuracy * 100))
     print("Train Loss: %.3f" % (avg_train_loss))
@@ -35,6 +46,8 @@ def print_progress(
 
 
 def save_progress(fold, epoch, avg_test_accuracy, model, model_optimizer):
+    """Saves a model checkpoint per epoch."""
+
     model_name = "cnn-fold{:d}-{:d}".format(fold + 1, int(datetime.now().timestamp()))
     checkpoint = "{:s}_{:d}-{:.2f}.tar".format(
         model_name, epoch + 1, avg_test_accuracy,
